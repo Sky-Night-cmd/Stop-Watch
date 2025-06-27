@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neon Stopwatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(circle at center, #0e0e0e, #000);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .container {
+      background: rgba(15, 20, 25, 0.8);
+      border-radius: 25px;
+      border: 1px solid rgba(0, 255, 200, 0.2);
+      backdrop-filter: blur(25px);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow:
+        0 0 30px rgba(0, 255, 200, 0.2),
+        0 0 60px rgba(0, 255, 255, 0.1),
+        inset 0 0 40px rgba(0, 255, 170, 0.1);
+      transition: 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+    }
+
+    .container::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 170, 0.1), transparent 70%);
+      animation: pulse 6s infinite linear;
+      z-index: 0;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+      100% {
+        transform: rotate(360deg) scale(1.1);
+      }
+    }
+
+    .time {
+      font-size: 3.4rem;
+      color: #00ffc3;
+      letter-spacing: 2px;
+      margin-bottom: 2.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      z-index: 1;
+      animation: glow 2s infinite alternate;
+      width: 100%;
+    }
+
+    @keyframes glow {
+      0% {
+        text-shadow: 0 0 10px #00ffaa, 0 0 20px #00ffaa;
+      }
+      100% {
+        text-shadow: 0 0 20px #00ffaa, 0 0 40px #00ffcc;
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      z-index: 1;
+    }
+
+    .buttons button {
+      padding: 0.9rem 1.8rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      min-width: 110px;
+      transition: 0.3s ease;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+      color: #fff;
+      letter-spacing: 1px;
+      position: relative;
+    }
+
+    .buttons button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    }
+
+    .start {
+      background: linear-gradient(135deg, #00ff99, #00ccff);
+    }
+
+    .start:disabled {
+      background: #444;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .pause {
+      background: linear-gradient(135deg, #ffd500, #ff8800);
+      color: #111;
+    }
+
+    .reset {
+      background: linear-gradient(135deg, #ff0040, #ff4081);
+    }
+
+    @media (max-width: 480px) {
+      .time {
+        font-size: 2.4rem;
+      }
+
+      .buttons button {
+        font-size: 0.95rem;
+        padding: 0.7rem 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="time" id="display">00:00:000</div>
+    <div class="buttons">
+      <button class="start" id="startBtn">▶ Start</button>
+      <button class="pause" id="pauseBtn">⏸ Pause</button>
+      <button class="reset" id="resetBtn">⏹ Reset</button>
+    </div>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let interval;
+    let running = false;
+    let elapsed = 0;
+
+    const display = document.getElementById("display");
+    const startBtn = document.getElementById("startBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function updateDisplay(time) {
+      const minutes = String(Math.floor(time / 60000)).padStart(2, '0');
+      const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, '0');
+      const milliseconds = String(time % 1000).padStart(3, '0');
+      display.textContent = `${minutes}:${seconds}:${milliseconds}`;
+    }
+
+    startBtn.addEventListener("click", () => {
+      if (running) return;
+      running = true;
+      startTime = Date.now() - elapsed;
+      interval = setInterval(() => {
+        elapsed = Date.now() - startTime;
+        updateDisplay(elapsed);
+      }, 10);
+      startBtn.disabled = true;
+    });
+
+    pauseBtn.addEventListener("click", () => {
+      if (!running) return;
+      running = false;
+      clearInterval(interval);
+      startBtn.disabled = false;
+    });
+
+    resetBtn.addEventListener("click", () => {
+      running = false;
+      clearInterval(interval);
+      elapsed = 0;
+      updateDisplay(0);
+      startBtn.disabled = false;
+    });
+
+    updateDisplay(0);
+  </script>
+</body>
+</html>
